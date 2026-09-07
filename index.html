@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사이버 히어로 · 게임 설계서</title>
+<style>
+:root{
+  --ink:#0F1B3D; --ink2:#1B2C5C; --paper:#ffffff; --paper2:#F4F7FC;
+  --line:#DDE5F3; --muted:#5A6478;
+  --hero:#1B7FE0; --villain:#E24C63; --gold:#E0A200; --gold-bg:#FFC93C; --cyan:#0089B3;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper2); color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  line-height:1.65; font-size:16px;
+}
+.wrap{max-width:860px;margin:0 auto;padding:0 18px 80px}
+
+/* ── 헤더 ── */
+header{background:var(--ink);color:#fff;padding:34px 0 30px;margin-bottom:26px}
+header .wrap{padding-bottom:0}
+.kicker{color:#7FD8F5;font-size:14px;font-weight:700;margin:0 0 10px}
+h1{font-size:34px;line-height:1.25;margin:0 0 10px;letter-spacing:-.5px}
+h1 .h{color:#5AB8FF}
+h1 .v{color:#FF8095}
+header p.lead{margin:0;color:#A9B6D2;font-size:16px}
+
+.idbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.idbar label{flex:1 1 160px;font-size:13px;color:#A9B6D2}
+.idbar input{
+  width:100%;margin-top:6px;padding:11px 12px;border-radius:10px;
+  border:1px solid #2C3F6E;background:#16244B;color:#fff;font-size:15px;font-family:inherit;
+}
+.idbar input:focus{outline:2px solid #5AB8FF;outline-offset:1px}
+
+/* ── 진행 ── */
+.progress{
+  position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+  border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:22px;
+  backdrop-filter:blur(6px);
+}
+.progress .wrap{padding-bottom:0;display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:9px;background:#E3EAF6;border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--hero);border-radius:99px;transition:width .3s}
+.count{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+
+/* ── 흐름 안내 ── */
+.flow{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:26px}
+.flow h2{font-size:16px;margin:0 0 8px}
+.flow p{margin:0;color:var(--muted);font-size:15px}
+
+/* ── 섹션 ── */
+section{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:22px 20px;margin-bottom:18px}
+.snum{
+  display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+  border-radius:50%;background:var(--ink);color:#fff;font-size:14px;font-weight:700;margin-bottom:10px
+}
+section h2{font-size:22px;margin:0 0 6px;letter-spacing:-.3px}
+section > p.desc{margin:0 0 18px;color:var(--muted);font-size:15px}
+
+.q{margin-bottom:20px}
+.q:last-child{margin-bottom:0}
+.q > h3{font-size:15px;margin:0 0 4px;font-weight:700}
+.q > .hint{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+
+/* ── 칩 ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{
+  border:1px solid var(--line);background:#fff;color:var(--ink);
+  padding:9px 14px;border-radius:99px;font-size:14.5px;cursor:pointer;
+  font-family:inherit;transition:background .15s,border-color .15s;
+}
+.chip:hover{background:var(--paper2)}
+.chip:focus-visible{outline:2px solid var(--hero);outline-offset:2px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.hero.on{background:var(--hero);border-color:var(--hero)}
+.chip.villain.on{background:var(--villain);border-color:var(--villain)}
+.chip.lock{opacity:.4;cursor:not-allowed}
+
+/* ── 입력 ── */
+input[type=text],textarea,select{
+  width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+  font-size:15.5px;font-family:inherit;color:var(--ink);background:#fff;line-height:1.6;
+}
+textarea{min-height:78px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--hero);outline-offset:1px;border-color:var(--hero)}
+.row2{display:flex;gap:12px;flex-wrap:wrap}
+.row2 > *{flex:1 1 240px}
+
+/* ── 미션 카드 ── */
+.mcard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--paper2)}
+.mcard .tag{display:inline-block;background:var(--ink);color:#fff;border-radius:8px;padding:3px 10px;font-size:13px;font-weight:700;margin-bottom:10px}
+.mcard label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
+.mcard label:first-of-type{margin-top:0}
+.empty{color:var(--muted);font-size:14.5px;background:var(--paper2);border:1px dashed var(--line);border-radius:12px;padding:16px;text-align:center}
+.ipo-help{background:#EEF6FC;border:1px solid #C9E3F5;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:14px;line-height:1.6}
+.ipo-help b{display:block;margin-bottom:3px;color:var(--hero)}
+.ipo-help span{color:var(--muted)}
+.ipo-step{display:flex;align-items:center;gap:7px;margin:12px 0 5px}
+.ipo-step em{
+  font-style:normal;flex:0 0 auto;width:22px;height:22px;border-radius:6px;
+  background:var(--hero);color:#fff;font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.ipo-step span{font-size:13px;color:var(--muted)}
+
+/* ── 프롬프트 ── */
+.promptbox{
+  background:#11213F;color:#EAF2FF;border-radius:12px;padding:16px;
+  font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;
+  font-size:13.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;
+  max-height:340px;overflow:auto;
+}
+.btn{
+  display:inline-block;border:none;border-radius:11px;padding:13px 20px;
+  font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer;
+}
+.btn-main{background:var(--hero);color:#fff}
+.btn-gold{background:var(--gold-bg);color:var(--ink)}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* ── 하단 ── */
+.footbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.saved{font-size:13px;color:var(--muted)}
+.linkish{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+
+/* ── 모달 ── */
+.mask{position:fixed;inset:0;background:rgba(15,27,61,.6);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:24px}
+.modal h3{margin:0 0 12px;font-size:19px}
+.modal ol{margin:0 0 14px;padding-left:20px;color:var(--ink);font-size:15px}
+.modal ol li{margin-bottom:6px}
+.modal p{color:var(--muted);font-size:14px;margin:0 0 16px}
+
+/* ── 토스트 ── */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:14.5px;
+  opacity:0;pointer-events:none;transition:.25s;z-index:60;
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:600px){
+  h1{font-size:27px} section h2{font-size:19px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ── 인쇄 ── */
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  header{background:#0F1B3D!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:20px 0}
+  .progress,.btns,.footbar,.mask,.toast,.chips,.flow{display:none!important}
+  section{break-inside:avoid;border:1px solid #ccc;margin-bottom:10px;padding:14px}
+  .promptbox{background:#fff!important;color:#000!important;border:1px solid #ccc;max-height:none}
+  input,textarea,select{border:none;border-bottom:1px solid #999;border-radius:0;padding:2px 0}
+  textarea{min-height:auto;height:auto}
+  .q > .hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="kicker">사이버 히어로 어드벤처</p>
+    <h1><span class="h">사이버 히어로</span> vs <span class="v">사이버 악당</span><br>게임 설계서</h1>
+    <p class="lead">매일 악당이 공격해 오고, 미니게임으로 막아 내는 보안 게임을 설계합니다.</p>
+    <div class="idbar">
+      <label>오늘 날짜<input type="text" id="f_date" data-k="date" placeholder="2026. 9. 7."></label>
+      <label>이름<input type="text" id="f_name" data-k="name" placeholder="김보안"></label>
+      <label>학교 · 반 (선택)<input type="text" id="f_class" data-k="cls" placeholder="한솔중 2-3"></label>
+    </div>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="wrap">
+    <div class="bar"><span id="barfill"></span></div>
+    <div class="count" id="barcount">0 / 0 칸</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div class="flow">
+  <h2>내가 만들 게임은 이렇게 돌아갑니다</h2>
+  <p>악당이 공격해 온다 → 알맞은 보안 버튼 고르기 → 미니게임 시작 → 막아 내면 공격 1회 방어 성공 → 다음 공격으로</p>
+</div>
+
+<!-- 1 -->
+<section>
+  <div class="snum">1</div>
+  <h2>내가 막고 싶은 사이버 위협</h2>
+  <p class="desc">게임으로 만들 위협을 하나만 고릅니다.</p>
+
+  <div class="q">
+    <h3>어떤 위협을 다룰까요?</h3>
+    <p class="hint">버튼을 누르면 아래 칸이 채워집니다. 내 말로 고쳐도 좋아요.</p>
+    <div class="chips" data-fill="f_threat">
+      <button class="chip" type="button">가짜 문자에 속아 링크를 눌러요</button>
+      <button class="chip" type="button">비밀번호가 너무 쉬워요</button>
+      <button class="chip" type="button">사진에 개인정보가 그대로 나와요</button>
+      <button class="chip" type="button">인터넷에 남긴 흔적이 지워지지 않아요</button>
+      <button class="chip" type="button">이상한 앱을 그냥 설치해요</button>
+    </div>
+    <input type="text" id="f_threat" data-k="threat" data-count placeholder="내가 막고 싶은 위협을 한 문장으로">
+  </div>
+
+  <div class="q">
+    <h3>그냥 두면 어떤 일이 생기나요?</h3>
+    <textarea id="f_damage" data-k="damage" data-count placeholder="예: 계정을 빼앗겨서 친구들에게 이상한 메시지가 가요."></textarea>
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <div class="snum">2</div>
+  <h2>게임 기본 설정</h2>
+  <p class="desc">게임의 겉모습과 주인공을 정합니다.</p>
+
+  <div class="q">
+    <h3>게임 이름</h3>
+    <div class="chips" data-fill="f_title">
+      <button class="chip" type="button">사이버 히어로</button>
+      <button class="chip" type="button">비밀번호 수호대</button>
+      <button class="chip" type="button">링크 조심 대작전</button>
+      <button class="chip" type="button">발자국 지우기 특공대</button>
+      <button class="chip" type="button">우리 반 보안 요원</button>
+    </div>
+    <input type="text" id="f_title" data-k="title" data-count placeholder="게임 이름">
+  </div>
+
+  <div class="q">
+    <h3>내 히어로</h3>
+    <p class="hint">악당을 막아 낼 주인공입니다. 버튼에서 고르거나 새로 지어도 좋아요.</p>
+    <div class="chips" data-fill="f_hero">
+      <button class="chip hero" type="button">🛡️ 방패 히어로</button>
+      <button class="chip hero" type="button">🔑 열쇠 히어로</button>
+      <button class="chip hero" type="button">👁️ 가짜를 알아보는 눈</button>
+      <button class="chip hero" type="button">🧹 흔적 지우개</button>
+      <button class="chip hero" type="button">🤖 보안 로봇</button>
+    </div>
+    <input type="text" id="f_hero" data-k="hero" data-count placeholder="히어로 이름">
+    <div style="height:16px"></div>
+    <div class="chips" data-fill="f_power">
+      <button class="chip hero" type="button">가짜 링크가 빨갛게 보인다</button>
+      <button class="chip hero" type="button">약한 비밀번호를 소리로 알려 준다</button>
+      <button class="chip hero" type="button">사진 속 개인정보를 자동으로 가린다</button>
+      <button class="chip hero" type="button">인터넷에 남은 흔적을 찾아낸다</button>
+      <button class="chip hero" type="button">악당의 거짓말을 알아듣는 귀</button>
+    </div>
+    <input type="text" id="f_power" data-k="power" data-count placeholder="히어로의 특별한 능력">
+  </div>
+
+  <div class="q">
+    <h3>게임을 하는 사람은 누구인가요?</h3>
+    <div class="chips" data-fill="f_player">
+      <button class="chip" type="button">처음 휴대폰을 갖게 된 초등학생</button>
+      <button class="chip" type="button">우리 반 보안 담당 학생</button>
+      <button class="chip" type="button">학교 컴퓨터실 관리 요원</button>
+      <button class="chip" type="button">미래 도시의 보안 대원</button>
+    </div>
+    <input type="text" id="f_player" data-k="player" data-count placeholder="게임 속 나는 누구인가">
+  </div>
+
+  <div class="q">
+    <h3>화면 분위기</h3>
+    <div class="chips" data-fill="f_mood">
+      <button class="chip" type="button">어두운 밤 도시 느낌</button>
+      <button class="chip" type="button">밝고 시원한 하늘색</button>
+      <button class="chip" type="button">옛날 게임 같은 픽셀 느낌</button>
+      <button class="chip" type="button">귀여운 만화 느낌</button>
+    </div>
+    <input type="text" id="f_mood" data-k="mood" data-count placeholder="화면 분위기">
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <div class="snum">3</div>
+  <h2>악당과 보안 버튼</h2>
+  <p class="desc">막아야 할 악당을 정하고, 막을 때 쓸 버튼을 고릅니다.</p>
+
+  <div class="q">
+    <h3>악당 이름</h3>
+    <div class="chips" data-fill="f_villain">
+      <button class="chip villain" type="button">피싱맨</button>
+      <button class="chip villain" type="button">링크 도둑</button>
+      <button class="chip villain" type="button">1234 마왕</button>
+      <button class="chip villain" type="button">발자국 그림자</button>
+      <button class="chip villain" type="button">사진 훔쳐보는 눈</button>
+    </div>
+    <input type="text" id="f_villain" data-k="villain" data-count placeholder="악당 이름">
+  </div>
+
+  <div class="q">
+    <h3>악당의 공격 방식</h3>
+    <div class="chips" data-fill="f_attack">
+      <button class="chip" type="button">급한 척하며 링크를 누르게 만든다</button>
+      <button class="chip" type="button">공짜 아이템을 준다고 속인다</button>
+      <button class="chip" type="button">친구인 척 말을 건다</button>
+      <button class="chip" type="button">사진 배경에서 정보를 찾아낸다</button>
+      <button class="chip" type="button">지운 글을 몰래 캡처해 둔다</button>
+    </div>
+    <input type="text" id="f_attack" data-k="attack" data-count placeholder="악당이 공격하는 방법">
+  </div>
+
+  <div class="q">
+    <h3>보안 버튼 고르기 (2~3개까지)</h3>
+    <p class="hint">욕심내면 시간 안에 못 만듭니다. 꼭 필요한 것만 고르세요.</p>
+    <div class="chips" id="btnpick">
+      <button class="chip" type="button" data-btn="🔍 링크 검사하기">🔍 링크 검사하기</button>
+      <button class="chip" type="button" data-btn="🔑 비밀번호 만들기">🔑 비밀번호 만들기</button>
+      <button class="chip" type="button" data-btn="🙈 개인정보 가리기">🙈 개인정보 가리기</button>
+      <button class="chip" type="button" data-btn="🧹 흔적 지우기">🧹 흔적 지우기</button>
+      <button class="chip" type="button" data-btn="🛡️ 백신 돌리기">🛡️ 백신 돌리기</button>
+      <button class="chip" type="button" data-btn="🚨 어른에게 알리기">🚨 어른에게 알리기</button>
+    </div>
+    <div class="row2">
+      <input type="text" id="addbtn" placeholder="직접 만든 버튼 이름">
+      <button class="btn btn-ghost" type="button" id="addbtn_go" style="flex:0 0 auto">추가</button>
+    </div>
+  </div>
+
+  <div class="q">
+    <h3>버튼마다 어떤 미니게임이 나올까요?</h3>
+    <p class="hint">미니게임을 고른 뒤, 그 게임이 어떻게 돌아가는지 세 칸으로 쪼개 봅니다.</p>
+    <div class="ipo-help">
+      <b>세 칸으로 쪼개기</b>
+      <span>자판기로 보면 이렇습니다. 동전을 넣는다(받는 것) → 금액이 맞는지 확인한다(판단하는 것) → 음료가 나온다(보여 주는 것)</span>
+    </div>
+    <div id="mini_wrap"><div class="empty">위에서 버튼을 먼저 골라 주세요.</div></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section>
+  <div class="snum">4</div>
+  <h2>악당의 공격 만들기</h2>
+  <p class="desc">공격이 올 때마다 화면에 사건이 하나 뜹니다. 어떤 버튼을 눌러야 할지 스스로 판단하게 만드는 것이 이 게임의 핵심입니다.</p>
+
+  <div class="q">
+    <div id="mission_wrap"><div class="empty">3단계에서 버튼을 먼저 골라 주세요.</div></div>
+  </div>
+
+  <div class="q">
+    <h3>공격을 막지 못하면?</h3>
+    <p class="hint">엉뚱한 버튼을 누르거나 미니게임에 실패했을 때의 벌칙입니다.</p>
+    <div class="chips" data-fill="f_penalty">
+      <button class="chip" type="button">보안 점수가 20 깎여요</button>
+      <button class="chip" type="button">계정 하나를 빼앗겨요</button>
+      <button class="chip" type="button">개인정보가 한 줄 새어 나가요</button>
+      <button class="chip" type="button">악당이 한 명 늘어나요</button>
+    </div>
+    <input type="text" id="f_penalty" data-k="penalty" data-count placeholder="실패했을 때 생기는 일">
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <div class="snum">5</div>
+  <h2>게임이 끝나는 때</h2>
+  <p class="desc">끝나는 조건이 없으면 게임이 영원히 이어집니다. 세 가지를 모두 정하세요.</p>
+
+  <div class="q">
+    <h3>악당은 몇 번 공격하나요?</h3>
+    <p class="hint">한 판에 몇 번 막아 내야 끝나는지 정합니다.</p>
+    <div class="chips" data-fill="f_days">
+      <button class="chip" type="button">3번</button>
+      <button class="chip" type="button">5번</button>
+      <button class="chip" type="button">7번</button>
+      <button class="chip" type="button">10번</button>
+    </div>
+    <input type="text" id="f_days" data-k="days" data-count placeholder="공격 횟수">
+  </div>
+
+  <div class="q">
+    <h3>이렇게 하면 이겨요</h3>
+    <div class="chips" data-fill="f_win">
+      <button class="chip" type="button">공격을 모두 막아 내면 이겨요</button>
+      <button class="chip" type="button">악당을 5번 물리치면 이겨요</button>
+      <button class="chip" type="button">보안 점수가 100이 되면 이겨요</button>
+      <button class="chip" type="button">지킴 배지를 3개 모으면 이겨요</button>
+    </div>
+    <input type="text" id="f_win" data-k="win" data-count placeholder="이기는 조건">
+  </div>
+
+  <div class="q">
+    <h3>이렇게 되면 져요</h3>
+    <div class="chips" data-fill="f_lose">
+      <button class="chip" type="button">보안 점수가 0이 되면 계정을 다 빼앗겨요</button>
+      <button class="chip" type="button">공격을 3번 놓치면 져요</button>
+      <button class="chip" type="button">개인정보가 5줄 새어 나가면 져요</button>
+      <button class="chip" type="button">마지막 공격을 못 막으면 져요</button>
+    </div>
+    <input type="text" id="f_lose" data-k="lose" data-count placeholder="지는 조건">
+  </div>
+</section>
+
+<!-- 6 -->
+<section>
+  <div class="snum">6</div>
+  <h2>AI에게 부탁할 말</h2>
+  <p class="desc">위에 쓴 내용이 자동으로 모입니다. 복사해서 그대로 붙여넣으세요.</p>
+
+  <div class="q">
+    <h3>더 부탁하고 싶은 것 (선택)</h3>
+    <textarea id="f_extra" data-k="extra" placeholder="예: 소리 효과를 넣어 줘. 글자를 크게 해 줘."></textarea>
+  </div>
+
+  <div class="promptbox" id="prompt"></div>
+  <div class="btns">
+    <button class="btn btn-main" type="button" id="copy">프롬프트 복사</button>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <div class="snum">7</div>
+  <h2>만들고 나서</h2>
+  <p class="desc">게임을 직접 해 본 뒤에 적습니다.</p>
+  <div class="q">
+    <h3>가장 마음에 드는 점</h3>
+    <textarea id="f_good" data-k="good"></textarea>
+  </div>
+  <div class="q">
+    <h3>더 고치고 싶은 점</h3>
+    <textarea id="f_fix" data-k="fix"></textarea>
+  </div>
+  <div class="q">
+    <h3>오늘 새롭게 알게 된 것</h3>
+    <textarea id="f_learn" data-k="learn"></textarea>
+  </div>
+</section>
+
+<div class="footbar">
+  <div>
+    <span class="saved" id="saved">자동으로 임시 저장됩니다</span>
+    <button class="linkish" type="button" id="clear" style="margin-left:10px">전체 지우기</button>
+  </div>
+  <button class="btn btn-gold" type="button" id="pdf">PDF로 저장</button>
+</div>
+
+</div>
+
+<!-- 인쇄 안내 -->
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3>PDF로 저장하는 방법</h3>
+    <ol>
+      <li>잠시 뒤 인쇄 창이 열립니다.</li>
+      <li>대상(프린터) 칸을 <b>PDF로 저장</b>으로 바꿉니다.</li>
+      <li><b>저장</b> 버튼을 누릅니다.</li>
+    </ol>
+    <p>미리보기 창에서는 인쇄가 막혀 있을 수 있어요. 저장이 안 되면 <b>설계서 텍스트 복사</b>를 눌러 붙여넣어 두세요.</p>
+    <div class="btns">
+      <button class="btn btn-main" type="button" id="doprint">인쇄 창 열기</button>
+      <button class="btn btn-ghost" type="button" id="copyall">설계서 텍스트 복사</button>
+      <button class="btn btn-ghost" type="button" id="closemask">그만두기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY='cyber-hero-design-v1';
+
+  /* ── 저장소 (미리보기 창에서 막혀도 안 죽게) ── */
+  var mem={};
+  var store={
+    get:function(){ try{ return localStorage.getItem(KEY); }catch(e){ return mem[KEY]||null; } },
+    set:function(v){ try{ localStorage.setItem(KEY,v); }catch(e){ mem[KEY]=v; } },
+    del:function(){ try{ localStorage.removeItem(KEY); }catch(e){ delete mem[KEY]; } }
+  };
+
+  var $=function(s){return document.querySelector(s);};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+  var state={buttons:[],mini:{},mission:{},ipo:{}};
+
+  /* ── 토스트 ── */
+  var tTimer;
+  function toast(msg){
+    var t=$('#toast'); t.textContent=msg; t.classList.add('on');
+    clearTimeout(tTimer); tTimer=setTimeout(function(){t.classList.remove('on');},1800);
+  }
+
+  /* ── 칩 → 입력칸 채우기 ── */
+  $$('.chips[data-fill]').forEach(function(box){
+    var target=$('#'+box.getAttribute('data-fill'));
+    box.querySelectorAll('.chip').forEach(function(chip){
+      chip.addEventListener('click',function(){
+        box.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+        chip.classList.add('on');
+        target.value=chip.textContent.trim();
+        save(); render();
+      });
+    });
+  });
+
+  /* ── 보안 버튼 고르기 ── */
+  function toggleBtn(name,el){
+    var i=state.buttons.indexOf(name);
+    if(i>-1){ state.buttons.splice(i,1); if(el)el.classList.remove('on'); }
+    else{
+      if(state.buttons.length>=3){ toast('버튼은 3개까지만 고를 수 있어요'); return; }
+      state.buttons.push(name); if(el)el.classList.add('on');
+    }
+    lockBtns(); renderMini(); renderMission(); save(); render();
+  }
+  function lockBtns(){
+    var full=state.buttons.length>=3;
+    $$('#btnpick .chip').forEach(function(c){
+      var on=state.buttons.indexOf(c.getAttribute('data-btn'))>-1;
+      c.classList.toggle('lock',full&&!on);
+    });
+  }
+  $$('#btnpick .chip').forEach(function(c){
+    c.addEventListener('click',function(){ toggleBtn(c.getAttribute('data-btn'),c); });
+  });
+  $('#addbtn_go').addEventListener('click',function(){
+    var v=$('#addbtn').value.trim(); if(!v) return;
+    if(state.buttons.indexOf(v)>-1){ toast('이미 있는 버튼이에요'); return; }
+    if(state.buttons.length>=3){ toast('버튼은 3개까지만 고를 수 있어요'); return; }
+    var b=document.createElement('button');
+    b.className='chip on'; b.type='button'; b.setAttribute('data-btn',v); b.textContent=v;
+    b.addEventListener('click',function(){ toggleBtn(v,b); });
+    $('#btnpick').appendChild(b);
+    state.buttons.push(v); $('#addbtn').value='';
+    lockBtns(); renderMini(); renderMission(); save(); render();
+  });
+
+  var MINI=['타이밍 맞춰 누르기','틀린 것 찾기','빠르게 분류하기','순서대로 이어 붙이기','O/X 고르기','드래그해서 옮기기'];
+  var IPO=[
+    ['in','받는 것','플레이어가 무엇을 누르거나 고르나요?','예: 문자 4개 중에서 가짜라고 생각하는 것을 누른다'],
+    ['proc','판단하는 것','컴퓨터가 무엇을 확인하나요?','예: 고른 문자가 진짜 가짜 문자인지 확인한다'],
+    ['out','보여 주는 것','화면에 무엇이 나타나나요?','예: 맞으면 초록 표시와 함께 보안 점수가 10 오른다']
+  ];
+
+  function renderMini(){
+    var w=$('#mini_wrap');
+    if(!state.buttons.length){ w.innerHTML='<div class="empty">위에서 버튼을 먼저 골라 주세요.</div>'; return; }
+    w.innerHTML='';
+    state.buttons.forEach(function(name){
+      var d=document.createElement('div'); d.className='mcard';
+      var opts=MINI.map(function(m){
+        var sel=(state.mini[name]===m)?' selected':'';
+        return '<option'+sel+'>'+m+'</option>';
+      }).join('');
+      var html='<span class="tag">'+name+'</span>'+
+        '<label>어떤 미니게임이 나올까요?</label>'+
+        '<select><option value="">고르기</option>'+opts+'</select>';
+      IPO.forEach(function(step,i){
+        html+='<div class="ipo-step"><em>'+(i+1)+'</em><span>'+step[1]+' — '+step[2]+'</span></div>'+
+              '<input type="text" data-ipo="'+step[0]+'" placeholder="'+step[3]+'">';
+      });
+      d.innerHTML=html;
+      var sel=d.querySelector('select');
+      sel.addEventListener('change',function(){ state.mini[name]=sel.value; save(); render(); });
+      if(!state.ipo[name]) state.ipo[name]={};
+      d.querySelectorAll('input[data-ipo]').forEach(function(inp){
+        var k=inp.getAttribute('data-ipo');
+        inp.value=state.ipo[name][k]||'';
+        inp.addEventListener('input',function(){ state.ipo[name][k]=inp.value; save(); render(); });
+      });
+      w.appendChild(d);
+    });
+  }
+
+  function renderMission(){
+    var w=$('#mission_wrap');
+    if(!state.buttons.length){ w.innerHTML='<div class="empty">3단계에서 버튼을 먼저 골라 주세요.</div>'; return; }
+    w.innerHTML='';
+    state.buttons.forEach(function(name){
+      var d=document.createElement('div'); d.className='mcard';
+      var cur=state.mission[name]||'';
+      d.innerHTML='<span class="tag">'+name+'</span>'+
+        '<label>이 버튼을 눌러야 하는 공격이 올 때 뜨는 문장</label>'+
+        '<input type="text" placeholder="예: 모르는 번호에서 문자가 왔어요!">';
+      var inp=d.querySelector('input'); inp.value=cur;
+      inp.addEventListener('input',function(){ state.mission[name]=inp.value; save(); render(); });
+      w.appendChild(d);
+    });
+  }
+
+  /* ── 진행률 ── */
+  function progress(){
+    var fields=$$('[data-count]');
+    var total=fields.length + state.buttons.length*5 + 1;
+    var done=fields.filter(function(f){return f.value.trim()!=='';}).length;
+    state.buttons.forEach(function(n){
+      if(state.mini[n]) done++;
+      if((state.mission[n]||'').trim()) done++;
+      var o=state.ipo[n]||{};
+      ['in','proc','out'].forEach(function(k){ if((o[k]||'').trim()) done++; });
+    });
+    if(state.buttons.length>=2) done++;
+    var pct=total?Math.round(done/total*100):0;
+    $('#barfill').style.width=pct+'%';
+    $('#barcount').textContent=done+' / '+total+' 칸';
+  }
+
+  /* ── 프롬프트 ── */
+  function v(id){ var e=$('#'+id); return e?e.value.trim():''; }
+  function buildPrompt(){
+    var L=[];
+    L.push('초등학생과 중학생이 할 수 있는 사이버 보안 게임 웹앱을 만들어줘.');
+    L.push('휴대폰과 태블릿에서도 잘 보이게 만들어줘.');
+    L.push('내가 올린 이미지가 있으면 히어로와 악당 그림으로 그대로 써줘.');
+    L.push('');
+    L.push('[게임 이름] '+(v('f_title')||'(정하는 중)'));
+    L.push('[막고 싶은 위협] '+(v('f_threat')||'(정하는 중)'));
+    if(v('f_damage')) L.push('[그냥 두면] '+v('f_damage'));
+    L.push('');
+    L.push('[주인공] '+(v('f_hero')||'(정하는 중)')+(v('f_power')?' — 능력: '+v('f_power'):''));
+    L.push('[악당] '+(v('f_villain')||'(정하는 중)')+(v('f_attack')?' — 공격: '+v('f_attack'):''));
+    if(v('f_player')) L.push('[플레이어] '+v('f_player'));
+    if(v('f_mood')) L.push('[화면 분위기] '+v('f_mood'));
+    L.push('');
+    L.push('[게임 방식]');
+    L.push('- 악당이 한 번씩 공격해 오고, 플레이어가 알맞은 보안 버튼을 고른다.');
+    L.push('- 버튼을 고르면 미니게임이 시작되고, 성공하면 그 공격을 막아 낸다.');
+    L.push('- 화면 위에 남은 공격 횟수와 보안 점수를 항상 보여 준다.');
+    L.push('');
+    L.push('[보안 버튼과 미니게임]');
+    if(state.buttons.length){
+      state.buttons.forEach(function(n){
+        var o=state.ipo[n]||{};
+        L.push('- '+n);
+        L.push('  · 미니게임: '+(state.mini[n]||'(정하는 중)'));
+        L.push('  · 플레이어가 하는 일: '+(o.in||'(정하는 중)'));
+        L.push('  · 컴퓨터가 확인하는 것: '+(o.proc||'(정하는 중)'));
+        L.push('  · 화면에 나타나는 것: '+(o.out||'(정하는 중)'));
+      });
+    }else{ L.push('- (아직 고르는 중)'); }
+    L.push('');
+    L.push('[공격이 올 때 뜨는 문장]');
+    if(state.buttons.length){
+      state.buttons.forEach(function(n){
+        L.push('- '+n+' 을 눌러야 하는 공격: "'+(state.mission[n]||'(정하는 중)')+'"');
+      });
+    }else{ L.push('- (아직 정하는 중)'); }
+    L.push('');
+    L.push('[실패하면] '+(v('f_penalty')||'(정하는 중)'));
+    L.push('[악당의 공격 횟수] '+(v('f_days')||'(정하는 중)'));
+    L.push('[이기는 조건] '+(v('f_win')||'(정하는 중)'));
+    L.push('[지는 조건] '+(v('f_lose')||'(정하는 중)'));
+    if(v('f_extra')){ L.push(''); L.push('[더 부탁하는 것] '+v('f_extra')); }
+    L.push('');
+    L.push('글자를 크게 하고, 버튼을 손가락으로 누르기 쉽게 만들어줘.');
+    return L.join('\n');
+  }
+
+  function render(){ $('#prompt').textContent=buildPrompt(); progress(); }
+
+  /* ── 저장 / 불러오기 ── */
+  var sTimer;
+  function save(){
+    var data={fields:{},buttons:state.buttons,mini:state.mini,mission:state.mission,ipo:state.ipo};
+    $$('[data-k]').forEach(function(f){ data.fields[f.getAttribute('data-k')]=f.value; });
+    store.set(JSON.stringify(data));
+    var s=$('#saved'); s.textContent='저장됨';
+    clearTimeout(sTimer); sTimer=setTimeout(function(){s.textContent='자동으로 임시 저장됩니다';},1400);
+  }
+  function load(){
+    var raw=store.get(); if(!raw) return;
+    try{
+      var d=JSON.parse(raw);
+      $$('[data-k]').forEach(function(f){
+        var k=f.getAttribute('data-k');
+        if(d.fields&&d.fields[k]!==undefined) f.value=d.fields[k];
+      });
+      state.buttons=d.buttons||[]; state.mini=d.mini||{}; state.mission=d.mission||{}; state.ipo=d.ipo||{};
+      $$('#btnpick .chip').forEach(function(c){
+        if(state.buttons.indexOf(c.getAttribute('data-btn'))>-1) c.classList.add('on');
+      });
+      state.buttons.forEach(function(n){
+        if(!document.querySelector('#btnpick .chip[data-btn="'+n.replace(/"/g,'')+'"]')){
+          var b=document.createElement('button');
+          b.className='chip on'; b.type='button'; b.setAttribute('data-btn',n); b.textContent=n;
+          b.addEventListener('click',function(){ toggleBtn(n,b); });
+          $('#btnpick').appendChild(b);
+        }
+      });
+      lockBtns(); renderMini(); renderMission();
+    }catch(e){}
+  }
+
+  $$('[data-k]').forEach(function(f){ f.addEventListener('input',function(){ save(); render(); }); });
+
+  $('#clear').addEventListener('click',function(){
+    if(!confirm('쓴 내용을 모두 지울까요?')) return;
+    store.del(); location.reload();
+  });
+
+  /* ── 복사 ── */
+  function copyText(txt,msg){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){toast(msg);},function(){fallback(txt,msg);});
+    }else{ fallback(txt,msg); }
+  }
+  function fallback(txt,msg){
+    var ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast(msg); }catch(e){ toast('복사가 안 돼요. 직접 선택해 주세요.'); }
+    document.body.removeChild(ta);
+  }
+  $('#copy').addEventListener('click',function(){ copyText(buildPrompt(),'프롬프트를 복사했어요'); });
+
+  function fullText(){
+    var L=['사이버 히어로 게임 설계서'];
+    L.push('이름: '+v('f_name')+'   날짜: '+v('f_date')+'   '+v('f_class'));
+    L.push('');
+    L.push(buildPrompt());
+    L.push('');
+    L.push('[가장 마음에 드는 점] '+v('f_good'));
+    L.push('[더 고치고 싶은 점] '+v('f_fix'));
+    L.push('[새롭게 알게 된 것] '+v('f_learn'));
+    return L.join('\n');
+  }
+  $('#copyall').addEventListener('click',function(){ copyText(fullText(),'설계서를 복사했어요'); });
+
+  /* ── PDF ── */
+  $('#pdf').addEventListener('click',function(){ $('#mask').classList.add('on'); });
+  $('#closemask').addEventListener('click',function(){ $('#mask').classList.remove('on'); });
+  $('#mask').addEventListener('click',function(e){ if(e.target===$('#mask')) $('#mask').classList.remove('on'); });
+  $('#doprint').addEventListener('click',function(){
+    $('#mask').classList.remove('on');
+    setTimeout(function(){
+      try{ window.print(); }
+      catch(e){ toast('이 창에서는 인쇄가 막혀 있어요. 텍스트 복사를 써 주세요.'); }
+    },250);
+  });
+
+  /* ── 시작 ── */
+  if(!$('#f_date').value){
+    var d=new Date();
+    $('#f_date').value=d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.';
+  }
+  load(); renderMini(); renderMission(); render();
+})();
+</script>
+</body>
+</html>
