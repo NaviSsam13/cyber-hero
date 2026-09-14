@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나만의 원소 캐릭터 설계서</title>
+<style>
+:root{
+  --ink:#1A1230; --paper:#fff; --paper2:#F7F5FC;
+  --line:#E3DDF2; --muted:#5F5878;
+  --violet:#6D46C7; --gold-bg:#FFC93C; --rose:#D4467E; --green:#1F8A5B;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper2);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  line-height:1.65;font-size:16px}
+.wrap{max-width:860px;margin:0 auto;padding:0 18px 80px}
+
+header{background:var(--ink);color:#fff;padding:34px 0 30px;margin-bottom:0}
+header .wrap{padding-bottom:0}
+.kicker{color:#C4AEFF;font-size:14px;font-weight:700;margin:0 0 10px}
+h1{font-size:34px;line-height:1.25;margin:0 0 10px;letter-spacing:-.5px}
+header p.lead{margin:0;color:#A79FC4;font-size:16px}
+.idbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.idbar label{flex:1 1 160px;font-size:13px;color:#A79FC4}
+.idbar input{width:100%;margin-top:6px;padding:11px 12px;border-radius:10px;
+  border:1px solid #3D3168;background:#241B42;color:#fff;font-size:15px;font-family:inherit}
+.idbar input:focus{outline:2px solid #C4AEFF;outline-offset:1px}
+
+/* 캐릭터 탭 */
+.tabbar{background:var(--ink);padding:0 0 18px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tab{border:1px solid #3D3168;background:#241B42;color:#C9C1E4;border-radius:10px 10px 0 0;
+  padding:10px 16px;font-size:14.5px;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:8px}
+.tab.on{background:#fff;color:var(--ink);border-color:#fff;font-weight:700}
+.tab .x{font-size:15px;opacity:.55;line-height:1}
+.tab .x:hover{opacity:1}
+.tab-add{border:1px dashed #5B4C91;background:transparent;color:#C4AEFF;border-radius:10px;
+  padding:10px 14px;font-size:14.5px;font-family:inherit;cursor:pointer}
+
+.progress{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+  border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:22px;backdrop-filter:blur(6px)}
+.progress .wrap{padding-bottom:0;display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:9px;background:#E9E3F7;border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--violet);border-radius:99px;transition:width .3s}
+.count{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+
+.notice{background:#FFF6DC;border:1px solid #F0D68A;border-radius:14px;
+  padding:16px 18px;margin-bottom:18px;font-size:15px;line-height:1.6}
+.notice b{display:block;margin-bottom:4px;color:#8A6400}
+.mission{background:#E9F7F0;border:1px solid #B6E0CC;border-radius:14px;
+  padding:16px 18px;margin-bottom:26px;font-size:15px;line-height:1.6}
+.mission b{display:block;margin-bottom:4px;color:var(--green)}
+
+section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 20px;margin-bottom:18px}
+.snum{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+  border-radius:50%;background:var(--ink);color:#fff;font-size:14px;font-weight:700;margin-bottom:10px}
+section h2{font-size:22px;margin:0 0 6px;letter-spacing:-.3px}
+section > p.desc{margin:0 0 18px;color:var(--muted);font-size:15px}
+.q{margin-bottom:20px}
+.q:last-child{margin-bottom:0}
+.q > h3{font-size:15px;margin:0 0 4px;font-weight:700}
+.q > .hint{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);
+  padding:9px 14px;border-radius:99px;font-size:14.5px;cursor:pointer;font-family:inherit;
+  transition:background .15s,border-color .15s}
+.chip:hover{background:var(--paper2)}
+.chip:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.chip.el.on{background:var(--violet);border-color:var(--violet)}
+.chip.wish.on{background:var(--rose);border-color:var(--rose)}
+.chip.nat.on{background:var(--green);border-color:var(--green)}
+
+input[type=text],textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+  font-size:15.5px;font-family:inherit;color:var(--ink);background:#fff;line-height:1.6}
+textarea{min-height:78px;resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--violet);outline-offset:1px;border-color:var(--violet)}
+
+.promptbox{background:#1A1230;color:#F0EAFF;border-radius:12px;padding:16px;
+  font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;
+  font-size:13.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;
+  max-height:360px;overflow:auto}
+.btn{display:inline-block;border:none;border-radius:11px;padding:13px 20px;
+  font-size:15.5px;font-weight:700;font-family:inherit;cursor:pointer}
+.btn-main{background:var(--violet);color:#fff}
+.btn-gold{background:var(--gold-bg);color:var(--ink)}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+.footbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.saved{font-size:13px;color:var(--muted)}
+.linkish{background:none;border:none;color:var(--muted);text-decoration:underline;
+  cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+
+.mask{position:fixed;inset:0;background:rgba(26,18,48,.6);display:none;
+  align-items:center;justify-content:center;padding:18px;z-index:50}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:24px}
+.modal h3{margin:0 0 12px;font-size:19px}
+.modal ol{margin:0 0 14px;padding-left:20px;font-size:15px}
+.modal ol li{margin-bottom:6px}
+.modal p{color:var(--muted);font-size:14px;margin:0 0 16px}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:14.5px;
+  opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:600px){h1{font-size:27px} section h2{font-size:19px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  header{background:#1A1230!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:20px 0}
+  .progress,.btns,.footbar,.mask,.toast,.chips,.notice,.mission,.tabbar{display:none!important}
+  section{break-inside:avoid;border:1px solid #ccc;margin-bottom:10px;padding:14px}
+  .promptbox{background:#fff!important;color:#000!important;border:1px solid #ccc;max-height:none}
+  input,textarea{border:none;border-bottom:1px solid #999;border-radius:0;padding:2px 0}
+  textarea{min-height:auto;height:auto}
+  .q > .hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="kicker">나만의 세계 만들기</p>
+    <h1>원소 캐릭터 설계서</h1>
+    <p class="lead">사라져 가는 나라의 풍경을 되살릴 주인공을 만듭니다.</p>
+    <div class="idbar">
+      <label>오늘 날짜<input type="text" id="f_date" data-g="date" placeholder="2026. 9. 14."></label>
+      <label>이름<input type="text" id="f_me" data-g="me" placeholder="김보안"></label>
+      <label>학교 · 반 (선택)<input type="text" id="f_cls" data-g="cls" placeholder="한솔중 2-3"></label>
+    </div>
+  </div>
+</header>
+
+<div class="tabbar">
+  <div class="wrap" style="padding-bottom:0">
+    <div class="tabs" id="tabs"></div>
+  </div>
+</div>
+
+<div class="progress">
+  <div class="wrap">
+    <div class="bar"><span id="barfill"></span></div>
+    <div class="count" id="barcount">0 / 0 칸</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div class="mission">
+  <b>우리가 만들 게임</b>
+  네 나라의 풍경이 사라지고 있습니다. 왜 그런지 알아보고, 네 원소의 힘으로 사람과 자연이 같이 살 방법을 찾는 게임을 만듭니다. 오늘은 그 게임의 주인공을 만듭니다.
+</div>
+
+<div class="notice">
+  <b>시작하기 전에</b>
+  게임에 나오는 캐릭터를 그대로 그리는 것은 만든 회사의 권리를 침해하는 일입니다. 실제 캐릭터 이름과 생김새는 쓰지 말고, <b>나만의 캐릭터</b>를 만들어 주세요. 세계관의 짜임새를 빌려 오는 것은 괜찮습니다.
+</div>
+
+<!-- 1 -->
+<section>
+  <div class="snum">1</div>
+  <h2>캐릭터가 사는 나라</h2>
+  <p class="desc">캐릭터보다 나라를 먼저 정합니다. 나라가 정해지면 캐릭터의 옷과 분위기가 따라옵니다.</p>
+
+  <div class="q">
+    <h3>이 나라를 다스리는 원소</h3>
+    <div class="chips" data-fill="f_element">
+      <button class="chip el" type="button">바람</button>
+      <button class="chip el" type="button">불</button>
+      <button class="chip el" type="button">물</button>
+      <button class="chip el" type="button">얼음</button>
+      <button class="chip el" type="button">번개</button>
+      <button class="chip el" type="button">풀</button>
+      <button class="chip el" type="button">바위</button>
+      <button class="chip el" type="button">빛</button>
+    </div>
+    <input type="text" id="f_element" data-k="element" data-count placeholder="원소">
+  </div>
+
+  <div class="q">
+    <h3>이 나라가 가장 소중히 여기는 것</h3>
+    <div class="chips" data-fill="f_value">
+      <button class="chip" type="button">자유</button>
+      <button class="chip" type="button">약속</button>
+      <button class="chip" type="button">지혜</button>
+      <button class="chip" type="button">정의</button>
+      <button class="chip" type="button">사랑</button>
+      <button class="chip" type="button">용기</button>
+      <button class="chip" type="button">영원함</button>
+    </div>
+    <input type="text" id="f_value" data-k="value" data-count placeholder="이 나라가 지키는 가치">
+  </div>
+
+  <div class="q">
+    <h3>나라의 풍경</h3>
+    <div class="chips" data-fill="f_place">
+      <button class="chip" type="button">꽃이 가득한 정원의 왕국</button>
+      <button class="chip" type="button">배가 드나드는 항구 도시</button>
+      <button class="chip" type="button">눈 덮인 산속 마을</button>
+      <button class="chip" type="button">사막 한가운데 오아시스</button>
+      <button class="chip" type="button">번개가 치는 바다 위 섬</button>
+      <button class="chip" type="button">거대한 나무 아래 숲의 도시</button>
+    </div>
+    <input type="text" id="f_place" data-k="place" data-count placeholder="나라의 풍경">
+  </div>
+
+  <div class="q">
+    <h3>이 나라에서 사라지고 있는 것</h3>
+    <p class="hint">다음 시간에 만들 게임의 출발점입니다. 내 원소와 어울리는 것으로 고르세요.</p>
+    <div class="chips" data-fill="f_lost">
+      <button class="chip nat" type="button">강이 말라 가고 있다</button>
+      <button class="chip nat" type="button">꽃과 나무가 시들고 있다</button>
+      <button class="chip nat" type="button">눈과 얼음이 녹아내리고 있다</button>
+      <button class="chip nat" type="button">하늘이 연기로 덮였다</button>
+      <button class="chip nat" type="button">땅이 갈라지고 산이 무너진다</button>
+      <button class="chip nat" type="button">숲에 불이 번지고 있다</button>
+      <button class="chip nat" type="button">빛을 너무 써서 밤이 사라졌다</button>
+    </div>
+    <input type="text" id="f_lost" data-k="lost" data-count placeholder="사라지고 있는 것">
+  </div>
+</section>
+
+<!-- 2 -->
+<section>
+  <div class="snum">2</div>
+  <h2>캐릭터는 누구인가</h2>
+  <p class="desc">이름과 역할을 정합니다. 실제 게임 캐릭터 이름은 쓰지 않습니다.</p>
+
+  <div class="q">
+    <h3>이 캐릭터의 자리</h3>
+    <p class="hint">캐릭터를 여러 개 만들 때 구분하는 칸입니다.</p>
+    <div class="chips" data-fill="f_role">
+      <button class="chip" type="button">주인공</button>
+      <button class="chip" type="button">함께 싸우는 동료</button>
+      <button class="chip" type="button">맞서는 상대</button>
+      <button class="chip" type="button">도움을 주는 어른</button>
+    </div>
+    <input type="text" id="f_role" data-k="role" data-count placeholder="이 캐릭터의 자리">
+  </div>
+
+  <div class="q">
+    <h3>이름</h3>
+    <p class="hint">부르기 쉽고, 나라 분위기에 어울리는 이름으로 지어 보세요.</p>
+    <input type="text" id="f_name" data-k="name" data-count placeholder="예: 리안, 세라핀, 유하">
+  </div>
+
+  <div class="q">
+    <h3>나이대</h3>
+    <div class="chips" data-fill="f_age">
+      <button class="chip" type="button">어린아이</button>
+      <button class="chip" type="button">10대 소년·소녀</button>
+      <button class="chip" type="button">20대 청년</button>
+      <button class="chip" type="button">나이를 알 수 없는 존재</button>
+    </div>
+    <input type="text" id="f_age" data-k="age" data-count placeholder="나이대">
+  </div>
+
+  <div class="q">
+    <h3>하는 일</h3>
+    <div class="chips" data-fill="f_job">
+      <button class="chip" type="button">나라를 지키는 기사</button>
+      <button class="chip" type="button">도서관의 사서</button>
+      <button class="chip" type="button">떠돌아다니는 음유시인</button>
+      <button class="chip" type="button">약을 만드는 연금술사</button>
+      <button class="chip" type="button">왕궁의 정원사</button>
+      <button class="chip" type="button">무기를 만드는 대장장이</button>
+      <button class="chip" type="button">숲을 돌보는 사냥꾼</button>
+      <button class="chip" type="button">물길을 살피는 뱃사공</button>
+    </div>
+    <input type="text" id="f_job" data-k="job" data-count placeholder="하는 일">
+  </div>
+
+  <div class="q">
+    <h3>성격</h3>
+    <div class="chips" data-fill="f_char">
+      <button class="chip" type="button">조용하고 다정한</button>
+      <button class="chip" type="button">밝고 장난기 많은</button>
+      <button class="chip" type="button">차갑지만 속은 따뜻한</button>
+      <button class="chip" type="button">진지하고 성실한</button>
+      <button class="chip" type="button">겁이 많지만 용기를 내는</button>
+      <button class="chip" type="button">당당하고 거침없는</button>
+    </div>
+    <input type="text" id="f_char" data-k="char" data-count placeholder="성격">
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <div class="snum">3</div>
+  <h2>겉모습</h2>
+  <p class="desc">AI가 그림을 그릴 때 가장 많이 참고하는 부분입니다. 구체적일수록 원하는 그림이 나옵니다.</p>
+
+  <div class="q">
+    <h3>머리</h3>
+    <div class="chips" data-fill="f_hair">
+      <button class="chip" type="button">갈색 긴 머리</button>
+      <button class="chip" type="button">은색 짧은 머리</button>
+      <button class="chip" type="button">검은색 반묶음 머리</button>
+      <button class="chip" type="button">금색 땋은 머리</button>
+      <button class="chip" type="button">하늘색 양갈래 머리</button>
+      <button class="chip" type="button">붉은색 곱슬머리</button>
+    </div>
+    <input type="text" id="f_hair" data-k="hair" data-count placeholder="머리 색과 모양">
+  </div>
+
+  <div class="q">
+    <h3>눈</h3>
+    <div class="chips" data-fill="f_eye">
+      <button class="chip" type="button">갈색 눈</button>
+      <button class="chip" type="button">푸른 눈</button>
+      <button class="chip" type="button">금색 눈</button>
+      <button class="chip" type="button">보라색 눈</button>
+      <button class="chip" type="button">한쪽만 색이 다른 눈</button>
+    </div>
+    <input type="text" id="f_eye" data-k="eye" data-count placeholder="눈 색">
+  </div>
+
+  <div class="q">
+    <h3>옷차림</h3>
+    <div class="chips" data-fill="f_cloth">
+      <button class="chip" type="button">레이스가 달린 크림색 드레스</button>
+      <button class="chip" type="button">망토를 두른 기사 복장</button>
+      <button class="chip" type="button">별 무늬가 수놓인 마법사 로브</button>
+      <button class="chip" type="button">움직이기 편한 여행자 차림</button>
+      <button class="chip" type="button">나라의 전통 의상</button>
+      <button class="chip" type="button">가죽 앞치마를 두른 작업복</button>
+    </div>
+    <input type="text" id="f_cloth" data-k="cloth" data-count placeholder="옷차림">
+  </div>
+
+  <div class="q">
+    <h3>늘 지니고 다니는 물건</h3>
+    <p class="hint">캐릭터를 한눈에 알아보게 만드는 소품입니다.</p>
+    <input type="text" id="f_item" data-k="item" data-count placeholder="예: 꽃이 담긴 바구니, 낡은 회중시계, 씨앗 주머니">
+  </div>
+</section>
+
+<!-- 4 -->
+<section>
+  <div class="snum">4</div>
+  <h2>원소의 힘을 얻은 이유</h2>
+  <p class="desc">이 세계에서 원소의 힘은 아무에게나 주어지지 않습니다. 간절히 바라는 것이 있는 사람에게만 주어집니다.</p>
+
+  <div class="q">
+    <h3>이 캐릭터가 가장 간절히 바라는 것</h3>
+    <p class="hint">이 칸이 캐릭터의 중심입니다. 천천히 생각해 보세요.</p>
+    <div class="chips wish" data-fill="f_wish">
+      <button class="chip wish" type="button">사라진 고향의 풍경을 되찾는 것</button>
+      <button class="chip wish" type="button">누군가를 지킬 만큼 강해지는 것</button>
+      <button class="chip wish" type="button">아무도 모르는 진실을 밝히는 것</button>
+      <button class="chip wish" type="button">잃어버린 가족을 다시 만나는 것</button>
+      <button class="chip wish" type="button">누군가에게 인정받는 것</button>
+      <button class="chip wish" type="button">넓은 세상을 자유롭게 보는 것</button>
+    </div>
+    <input type="text" id="f_wish" data-k="wish" data-count placeholder="가장 바라는 것">
+  </div>
+
+  <div class="q">
+    <h3>그 소망이 왜 이 원소와 어울리나요?</h3>
+    <p class="hint">한 문장이면 충분합니다.</p>
+    <textarea id="f_why" data-k="why" data-count placeholder="예: 마른 강을 다시 흐르게 하고 싶었기 때문에 물의 힘을 받았다."></textarea>
+  </div>
+
+  <div class="q">
+    <h3>원소의 표식이 몸 어디에 있나요?</h3>
+    <div class="chips" data-fill="f_mark">
+      <button class="chip" type="button">허리에 매단 보석</button>
+      <button class="chip" type="button">목걸이</button>
+      <button class="chip" type="button">손등의 문양</button>
+      <button class="chip" type="button">머리 장식</button>
+      <button class="chip" type="button">망토의 브로치</button>
+    </div>
+    <input type="text" id="f_mark" data-k="mark" data-count placeholder="표식의 위치">
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <div class="snum">5</div>
+  <h2>원소로 할 수 있는 일</h2>
+  <p class="desc">무기와 기술을 정합니다. 사라져 가는 것을 되살리는 힘이면 더 좋습니다.</p>
+
+  <div class="q">
+    <h3>무기</h3>
+    <div class="chips" data-fill="f_weapon">
+      <button class="chip" type="button">한손검</button>
+      <button class="chip" type="button">커다란 대검</button>
+      <button class="chip" type="button">활</button>
+      <button class="chip" type="button">마법책</button>
+      <button class="chip" type="button">긴 창</button>
+      <button class="chip" type="button">무기 대신 맨손</button>
+    </div>
+    <input type="text" id="f_weapon" data-k="weapon" data-count placeholder="무기">
+  </div>
+
+  <div class="q">
+    <h3>필살기 이름</h3>
+    <input type="text" id="f_skill" data-k="skill" data-count placeholder="예: 흩날리는 꽃잎의 노래">
+  </div>
+
+  <div class="q">
+    <h3>필살기를 쓰면 어떤 장면이 펼쳐지나요?</h3>
+    <textarea id="f_skilldesc" data-k="skilldesc" data-count placeholder="예: 발밑에서 꽃이 피어오르고 마른 땅에 물이 돌기 시작한다."></textarea>
+  </div>
+</section>
+
+<!-- 6 -->
+<section>
+  <div class="snum">6</div>
+  <h2>소개 문구</h2>
+  <p class="desc">패들렛에 올릴 때 함께 쓸 글입니다.</p>
+
+  <div class="q">
+    <h3>한 줄 소개</h3>
+    <input type="text" id="f_intro" data-k="intro" data-count placeholder="예: 말라 가는 강을 되살리려는, 마음이 여린 뱃사공">
+  </div>
+
+  <div class="q">
+    <h3>대표 대사</h3>
+    <input type="text" id="f_line" data-k="line" data-count placeholder='예: "물은 서두르는 법이 없어요."'>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <div class="snum">7</div>
+  <h2>AI에게 줄 문장</h2>
+  <p class="desc">위에 쓴 내용이 자동으로 모입니다. 복사해서 이미지 생성 칸에 붙여넣으세요.</p>
+
+  <div class="q">
+    <h3>더 부탁하고 싶은 것 (선택)</h3>
+    <textarea id="f_extra" data-k="extra" placeholder="예: 표정을 여러 개 보여 줘. 배경은 단순하게 해 줘."></textarea>
+  </div>
+
+  <div class="promptbox" id="prompt"></div>
+  <div class="btns">
+    <button class="btn btn-main" type="button" id="copy">문장 복사하기</button>
+    <button class="btn btn-ghost" type="button" id="copypad">패들렛에 올릴 글 복사</button>
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <div class="snum">8</div>
+  <h2>만들고 나서</h2>
+  <p class="desc">그림을 뽑아 본 뒤에 적습니다.</p>
+  <div class="q">
+    <h3>생각한 대로 나온 부분</h3>
+    <textarea id="f_good" data-k="good"></textarea>
+  </div>
+  <div class="q">
+    <h3>다르게 나온 부분</h3>
+    <textarea id="f_bad" data-k="bad"></textarea>
+  </div>
+  <div class="q">
+    <h3>다시 만든다면 어느 칸을 고치겠나요?</h3>
+    <textarea id="f_fix" data-k="fix"></textarea>
+  </div>
+</section>
+
+<div class="footbar">
+  <div>
+    <span class="saved" id="saved">자동으로 임시 저장됩니다</span>
+    <button class="linkish" type="button" id="clear" style="margin-left:10px">전체 지우기</button>
+  </div>
+  <button class="btn btn-gold" type="button" id="pdf">PDF로 저장</button>
+</div>
+
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3>PDF로 저장하는 방법</h3>
+    <ol>
+      <li>잠시 뒤 인쇄 창이 열립니다.</li>
+      <li>대상(프린터) 칸을 <b>PDF로 저장</b>으로 바꿉니다.</li>
+      <li><b>저장</b> 버튼을 누릅니다.</li>
+    </ol>
+    <p>지금 열려 있는 캐릭터만 저장됩니다. 캐릭터가 여러 개면 하나씩 저장하세요. 저장이 안 되면 <b>전체 복사</b>를 눌러 다른 곳에 붙여넣어 두세요.</p>
+    <div class="btns">
+      <button class="btn btn-main" type="button" id="doprint">인쇄 창 열기</button>
+      <button class="btn btn-ghost" type="button" id="copyall">전체 복사</button>
+      <button class="btn btn-ghost" type="button" id="closemask">그만두기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY='element-character-v2';
+  var mem={};
+  var store={
+    get:function(){ try{ return localStorage.getItem(KEY); }catch(e){ return mem[KEY]||null; } },
+    set:function(v){ try{ localStorage.setItem(KEY,v); }catch(e){ mem[KEY]=v; } },
+    del:function(){ try{ localStorage.removeItem(KEY); }catch(e){ delete mem[KEY]; } }
+  };
+  var $=function(s){return document.querySelector(s);};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+
+  var FIELDS=$$('[data-k]');
+  var GLOBALS=$$('[data-g]');
+  var data={ global:{}, chars:[{}], active:0 };
+
+  var tTimer;
+  function toast(m){
+    var t=$('#toast'); t.textContent=m; t.classList.add('on');
+    clearTimeout(tTimer); tTimer=setTimeout(function(){t.classList.remove('on');},1800);
+  }
+
+  function cur(){ return data.chars[data.active]||{}; }
+  function v(id){ var e=$('#'+id); return e?e.value.trim():''; }
+
+  /* ── 탭 ── */
+  function label(i){
+    var c=data.chars[i]||{};
+    var n=(c.name||'').trim();
+    if(n) return n;
+    var r=(c.role||'').trim();
+    if(r) return r;
+    return '캐릭터 '+(i+1);
+  }
+  function renderTabs(){
+    var box=$('#tabs'); box.innerHTML='';
+    data.chars.forEach(function(c,i){
+      var b=document.createElement('button');
+      b.type='button'; b.className='tab'+(i===data.active?' on':'');
+      b.appendChild(document.createTextNode(label(i)));
+      if(data.chars.length>1){
+        var x=document.createElement('span');
+        x.className='x'; x.textContent='×'; x.title='이 캐릭터 지우기';
+        x.addEventListener('click',function(e){
+          e.stopPropagation();
+          if(!confirm(label(i)+' 을(를) 지울까요?')) return;
+          data.chars.splice(i,1);
+          if(data.active>=data.chars.length) data.active=data.chars.length-1;
+          save(); fill(); renderTabs(); render();
+        });
+        b.appendChild(x);
+      }
+      b.addEventListener('click',function(){
+        data.active=i; save(); fill(); renderTabs(); render();
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+      box.appendChild(b);
+    });
+    var add=document.createElement('button');
+    add.type='button'; add.className='tab-add'; add.textContent='+ 캐릭터 추가';
+    add.addEventListener('click',function(){
+      if(data.chars.length>=6){ toast('캐릭터는 6개까지 만들 수 있어요'); return; }
+      data.chars.push({}); data.active=data.chars.length-1;
+      save(); fill(); renderTabs(); render();
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+    box.appendChild(add);
+  }
+
+  /* ── 입력칸 채우기 ── */
+  function fill(){
+    var c=cur();
+    FIELDS.forEach(function(f){
+      f.value=c[f.getAttribute('data-k')]||'';
+    });
+    $$('.chips[data-fill]').forEach(function(box){
+      var t=$('#'+box.getAttribute('data-fill'));
+      box.querySelectorAll('.chip').forEach(function(ch){
+        ch.classList.toggle('on', t && ch.textContent.trim()===t.value.trim() && t.value.trim()!=='');
+      });
+    });
+  }
+
+  $$('.chips[data-fill]').forEach(function(box){
+    var target=$('#'+box.getAttribute('data-fill'));
+    box.querySelectorAll('.chip').forEach(function(chip){
+      chip.addEventListener('click',function(){
+        box.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+        chip.classList.add('on');
+        target.value=chip.textContent.trim();
+        collect(); save(); render(); renderTabs();
+      });
+    });
+  });
+
+  function collect(){
+    var c=cur();
+    FIELDS.forEach(function(f){ c[f.getAttribute('data-k')]=f.value; });
+    GLOBALS.forEach(function(f){ data.global[f.getAttribute('data-g')]=f.value; });
+  }
+
+  /* ── 프롬프트 ── */
+  function buildPrompt(){
+    var el=v('f_element')||'(원소)';
+    var who=[v('f_age'),v('f_job')].filter(Boolean).join(' ');
+    var L=[];
+    L.push(
+      [el+' 원소를 쓰는 캐릭터', who, v('f_hair'), v('f_eye'), v('f_cloth'),
+       v('f_item')?v('f_item')+'을 들고 있음':'',
+       v('f_char')?v('f_char')+' 분위기':'',
+       v('f_place')?v('f_place')+' 배경':'',
+       '전신','캐릭터 설정화','애니메이션 스타일','고퀄리티','초고해상도'
+      ].filter(Boolean).join(', ')+'.'
+    );
+    L.push('');
+    L.push('키워드');
+    [el, v('f_value'), v('f_place'), v('f_role'), v('f_age'), v('f_job'),
+     v('f_char'), v('f_hair'), v('f_eye'), v('f_cloth'), v('f_item'),
+     v('f_mark'), v('f_weapon')
+    ].forEach(function(x){ if(x) L.push('* '+x); });
+
+    L.push('');
+    L.push('[캐릭터 설정]');
+    if(v('f_name')) L.push('- 이름: '+v('f_name'));
+    if(v('f_role')) L.push('- 자리: '+v('f_role'));
+    if(v('f_intro')) L.push('- 소개: '+v('f_intro'));
+    if(v('f_lost')) L.push('- 나라에서 사라지는 것: '+v('f_lost'));
+    if(v('f_wish')) L.push('- 간절히 바라는 것: '+v('f_wish'));
+    if(v('f_why')) L.push('- 원소를 얻은 이유: '+v('f_why'));
+    if(v('f_weapon')) L.push('- 무기: '+v('f_weapon'));
+    if(v('f_skill')) L.push('- 필살기: '+v('f_skill'));
+    if(v('f_skilldesc')) L.push('- 필살기 장면: '+v('f_skilldesc'));
+    if(v('f_line')) L.push('- 대표 대사: '+v('f_line'));
+
+    if(v('f_extra')){ L.push(''); L.push('[더 부탁하는 것] '+v('f_extra')); }
+    L.push('');
+    L.push('실제 게임에 나오는 캐릭터가 아니라, 위 설정에 맞는 새로운 캐릭터로 그려 줘.');
+    return L.join('\n');
+  }
+
+  function padText(){
+    var L=[];
+    L.push((v('f_name')||'(이름)')+' · '+(v('f_element')||'(원소)')+'의 '+(v('f_role')||'주인공'));
+    if(v('f_intro')) L.push(v('f_intro'));
+    if(v('f_place')||v('f_lost')){
+      L.push('');
+      if(v('f_place')) L.push('나라: '+v('f_place'));
+      if(v('f_lost')) L.push('사라지는 것: '+v('f_lost'));
+    }
+    if(v('f_wish')) L.push('바라는 것: '+v('f_wish'));
+    if(v('f_line')){ L.push(''); L.push(v('f_line')); }
+    L.push('');
+    L.push('만든 사람: '+(data.global.me||''));
+    return L.join('\n');
+  }
+
+  function progress(){
+    var done=FIELDS.filter(function(x){return x.hasAttribute('data-count')&&x.value.trim()!=='';}).length;
+    var total=FIELDS.filter(function(x){return x.hasAttribute('data-count');}).length;
+    var pct=total?Math.round(done/total*100):0;
+    $('#barfill').style.width=pct+'%';
+    $('#barcount').textContent=done+' / '+total+' 칸';
+  }
+  function render(){ $('#prompt').textContent=buildPrompt(); progress(); }
+
+  /* ── 저장 ── */
+  var sTimer;
+  function save(){
+    store.set(JSON.stringify(data));
+    var s=$('#saved'); s.textContent='저장됨';
+    clearTimeout(sTimer); sTimer=setTimeout(function(){s.textContent='자동으로 임시 저장됩니다';},1400);
+  }
+  function load(){
+    var raw=store.get(); if(!raw) return;
+    try{
+      var d=JSON.parse(raw);
+      if(d&&d.chars&&d.chars.length){
+        data=d;
+        if(typeof data.active!=='number'||data.active>=data.chars.length) data.active=0;
+        if(!data.global) data.global={};
+        GLOBALS.forEach(function(f){
+          var k=f.getAttribute('data-g');
+          if(data.global[k]!==undefined) f.value=data.global[k];
+        });
+      }
+    }catch(e){}
+  }
+
+  FIELDS.forEach(function(f){
+    f.addEventListener('input',function(){ collect(); save(); render(); renderTabs(); });
+  });
+  GLOBALS.forEach(function(f){
+    f.addEventListener('input',function(){ collect(); save(); });
+  });
+
+  $('#clear').addEventListener('click',function(){
+    if(!confirm('모든 캐릭터를 지울까요?')) return;
+    store.del(); location.reload();
+  });
+
+  /* ── 복사 ── */
+  function copyText(t,m){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){toast(m);},function(){fb(t,m);});
+    }else fb(t,m);
+  }
+  function fb(t,m){
+    var ta=document.createElement('textarea');
+    ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast(m); }catch(e){ toast('복사가 안 돼요. 직접 선택해 주세요.'); }
+    document.body.removeChild(ta);
+  }
+  $('#copy').addEventListener('click',function(){ copyText(buildPrompt(),'문장을 복사했어요'); });
+  $('#copypad').addEventListener('click',function(){ copyText(padText(),'패들렛용 글을 복사했어요'); });
+
+  $('#copyall').addEventListener('click',function(){
+    var saveActive=data.active, out=['원소 캐릭터 설계서'];
+    out.push('이름: '+(data.global.me||'')+'   날짜: '+(data.global.date||'')+'   '+(data.global.cls||''));
+    data.chars.forEach(function(c,i){
+      data.active=i; fill();
+      out.push(''); out.push('──────── '+label(i)+' ────────');
+      out.push(buildPrompt());
+      if(v('f_good')||v('f_bad')||v('f_fix')){
+        out.push('');
+        out.push('[생각한 대로 나온 부분] '+v('f_good'));
+        out.push('[다르게 나온 부분] '+v('f_bad'));
+        out.push('[다시 만든다면] '+v('f_fix'));
+      }
+    });
+    data.active=saveActive; fill(); render();
+    copyText(out.join('\n'),'모든 캐릭터를 복사했어요');
+  });
+
+  $('#pdf').addEventListener('click',function(){ $('#mask').classList.add('on'); });
+  $('#closemask').addEventListener('click',function(){ $('#mask').classList.remove('on'); });
+  $('#mask').addEventListener('click',function(e){ if(e.target===$('#mask')) $('#mask').classList.remove('on'); });
+  $('#doprint').addEventListener('click',function(){
+    $('#mask').classList.remove('on');
+    setTimeout(function(){
+      try{ window.print(); }catch(e){ toast('이 창에서는 인쇄가 막혀 있어요. 전체 복사를 써 주세요.'); }
+    },250);
+  });
+
+  /* ── 시작 ── */
+  load();
+  if(!$('#f_date').value){
+    var d=new Date();
+    $('#f_date').value=d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.';
+    data.global.date=$('#f_date').value;
+  }
+  fill(); renderTabs(); render();
+})();
+</script>
+</body>
+</html>
