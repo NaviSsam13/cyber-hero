@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내 나라에 생긴 일 · 게임 설계서</title>
+<style>
+:root{--ink:#123024;--paper2:#F4F8F5;--line:#D9E7DE;--muted:#56695E;
+  --green:#1F8A5B;--gold-bg:#FFC93C;--rose:#C9405F;--violet:#6D46C7}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper2);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",system-ui,sans-serif;
+  line-height:1.65;font-size:16px}
+.wrap{max-width:860px;margin:0 auto;padding:0 18px 80px}
+header{background:var(--ink);color:#fff;padding:34px 0 30px;margin-bottom:26px}
+header .wrap{padding-bottom:0}
+.kicker{color:#9FE3C1;font-size:14px;font-weight:700;margin:0 0 10px}
+h1{font-size:34px;line-height:1.25;margin:0 0 10px;letter-spacing:-.5px}
+header p.lead{margin:0;color:#A3BDB0;font-size:16px}
+.idbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.idbar label{flex:1 1 160px;font-size:13px;color:#A3BDB0}
+.idbar input{width:100%;margin-top:6px;padding:11px 12px;border-radius:10px;
+  border:1px solid #2E5443;background:#1B4232;color:#fff;font-size:15px;font-family:inherit}
+
+.progress{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96);
+  border-bottom:1px solid var(--line);padding:10px 0;margin-bottom:22px;backdrop-filter:blur(6px)}
+.progress .wrap{padding-bottom:0;display:flex;align-items:center;gap:12px}
+.bar{flex:1;height:9px;background:#E1ECE5;border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--green);border-radius:99px;transition:width .3s}
+.count{font-size:13px;font-weight:700;color:var(--muted);white-space:nowrap}
+
+.flow{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:22px}
+.flow b{display:block;margin-bottom:4px}
+.flow p{margin:0;color:var(--muted);font-size:15px}
+
+section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px 20px;margin-bottom:18px}
+.snum{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+  border-radius:50%;background:var(--ink);color:#fff;font-size:14px;font-weight:700;margin-bottom:10px}
+section.key .snum{background:var(--rose)}
+section.key{border-color:#F0C4CF}
+section h2{font-size:22px;margin:0 0 6px;letter-spacing:-.3px}
+section > p.desc{margin:0 0 18px;color:var(--muted);font-size:15px}
+.q{margin-bottom:20px}
+.q:last-child{margin-bottom:0}
+.q > h3{font-size:15px;margin:0 0 4px}
+.q > .hint{font-size:13.5px;color:var(--muted);margin:0 0 10px}
+.must{display:inline-block;background:var(--rose);color:#fff;font-size:12px;font-weight:700;
+  border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:1px}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{border:1px solid var(--line);background:#fff;color:var(--ink);padding:9px 14px;
+  border-radius:99px;font-size:14.5px;cursor:pointer;font-family:inherit}
+.chip:hover{background:var(--paper2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+input[type=text],textarea,select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;
+  font-size:15.5px;font-family:inherit;color:var(--ink);background:#fff;line-height:1.6}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--green);outline-offset:1px;border-color:var(--green)}
+.warn{display:none;font-size:13.5px;color:var(--rose);margin-top:6px}
+.warn.on{display:block}
+.row2{display:flex;gap:12px;flex-wrap:wrap}
+.row2 > *{flex:1 1 240px}
+
+.mcard{border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;background:var(--paper2)}
+.mcard .tag{display:inline-block;background:var(--ink);color:#fff;border-radius:8px;
+  padding:3px 10px;font-size:13px;font-weight:700;margin-bottom:10px}
+.mcard label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}
+.mcard label:first-of-type{margin-top:0}
+.ipo{display:flex;align-items:center;gap:7px;margin:12px 0 5px}
+.ipo em{font-style:normal;width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;
+  font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ipo span{font-size:13px;color:var(--muted)}
+
+.lockbox{background:#FFF1F4;border:1px dashed #E7A3B3;border-radius:12px;padding:18px;
+  text-align:center;color:var(--rose);font-size:15px;line-height:1.7}
+.promptbox{background:#123024;color:#E8FFF3;border-radius:12px;padding:16px;
+  font-family:ui-monospace,Menlo,Consolas,"Courier New",monospace;font-size:13.5px;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;max-height:380px;overflow:auto}
+.btn{display:inline-block;border:none;border-radius:11px;padding:13px 20px;font-size:15.5px;
+  font-weight:700;font-family:inherit;cursor:pointer}
+.btn-main{background:var(--green);color:#fff}
+.btn-main:disabled{background:#B9CCC1;cursor:not-allowed}
+.btn-gold{background:var(--gold-bg);color:var(--ink)}
+.btn-ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn-violet{background:var(--violet);color:#fff}
+.btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.footbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.saved{font-size:13px;color:var(--muted)}
+.linkish{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;font-size:13px;font-family:inherit;padding:0}
+.mask{position:fixed;inset:0;background:rgba(18,48,36,.6);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+.mask.on{display:flex}
+.modal{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:24px}
+.modal h3{margin:0 0 12px;font-size:19px}
+.modal ol{margin:0 0 14px;padding-left:20px;font-size:15px}
+.modal p{color:var(--muted);font-size:14px;margin:0 0 16px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);
+  color:#fff;padding:12px 20px;border-radius:99px;font-size:14.5px;opacity:0;pointer-events:none;transition:.25s;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:600px){h1{font-size:27px} section h2{font-size:19px}}
+@media print{
+  body{background:#fff;font-size:11.5pt}
+  header{background:#123024!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;padding:20px 0}
+  .progress,.btns,.footbar,.mask,.toast,.chips,.flow,.warn,.lockbox{display:none!important}
+  section{break-inside:avoid;border:1px solid #ccc;margin-bottom:10px;padding:14px}
+  .promptbox{background:#fff!important;color:#000!important;border:1px solid #ccc;max-height:none}
+  input,textarea,select{border:none;border-bottom:1px solid #999;border-radius:0;padding:2px 0}
+  .q > .hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="kicker">나만의 세계 만들기 · 2</p>
+    <h1>내 나라에 생긴 일</h1>
+    <p class="lead">내 캐릭터의 나라에서 무엇이 사라지고 있는지, 왜 그렇게 되었는지 알아내고 게임으로 만듭니다.</p>
+    <div class="idbar">
+      <label>오늘 날짜<input type="text" id="f_date" data-k="date" placeholder="2026. 9. 21."></label>
+      <label>이름<input type="text" id="f_me" data-k="me" placeholder="김보안"></label>
+    </div>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="wrap">
+    <div class="bar"><span id="barfill"></span></div>
+    <div class="count" id="barcount">0 / 0 칸</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<div class="flow">
+  <b>오늘 만들 게임</b>
+  <p>무언가 사라지고 있다 → 누가 그렇게 만들었는지 알아낸다 → 그 사람에게도 이유가 있었다 → 내 원소의 힘으로 사람과 자연이 함께 사는 방법을 찾는다</p>
+</div>
+
+<!-- 1 -->
+<section>
+  <div class="snum">1</div>
+  <h2>내 캐릭터</h2>
+  <p class="desc">지난 시간에 만든 캐릭터입니다. 설계서가 남아 있으면 버튼으로 불러오고, 없으면 직접 적어 주세요.</p>
+  <div class="btns" style="margin:0 0 16px">
+    <button class="btn btn-violet" type="button" id="import">지난 시간 캐릭터 불러오기</button>
+  </div>
+  <div class="row2">
+    <div class="q"><h3>주인공 이름</h3><input type="text" id="f_hero" data-k="hero" data-count placeholder="예: 에르아"></div>
+    <div class="q"><h3>원소</h3><input type="text" id="f_el" data-k="el" data-count placeholder="예: 바람"></div>
+  </div>
+  <div class="q"><h3>나라의 풍경</h3><input type="text" id="f_place" data-k="place" data-count placeholder="예: 꽃이 가득한 정원의 왕국"></div>
+  <div class="q"><h3>주인공이 간절히 바라는 것</h3><input type="text" id="f_wish" data-k="wish" data-count placeholder="예: 사라진 고향의 풍경을 되찾는 것"></div>
+</section>
+
+<!-- 2 -->
+<section>
+  <div class="snum">2</div>
+  <h2>무엇이 사라지고 있나</h2>
+  <p class="desc">게임이 시작되는 장면입니다. 눈에 보이듯이 적을수록 게임 화면이 잘 나옵니다.</p>
+  <div class="q">
+    <h3>사라지고 있는 것</h3>
+    <div class="chips" data-fill="f_lost">
+      <button class="chip" type="button">강이 말라 가고 있다</button>
+      <button class="chip" type="button">꽃과 나무가 시들고 있다</button>
+      <button class="chip" type="button">눈과 얼음이 녹아내리고 있다</button>
+      <button class="chip" type="button">하늘이 연기로 덮였다</button>
+      <button class="chip" type="button">땅이 갈라지고 산이 무너진다</button>
+      <button class="chip" type="button">숲에 불이 번지고 있다</button>
+      <button class="chip" type="button">빛을 너무 써서 밤이 사라졌다</button>
+    </div>
+    <input type="text" id="f_lost" data-k="lost" data-count placeholder="사라지고 있는 것">
+  </div>
+  <div class="q">
+    <h3>그래서 나라에 어떤 일이 생겼나요? <span class="must">직접 쓰기</span></h3>
+    <p class="hint">누가 어떻게 힘들어졌는지 한두 문장으로 적어 보세요.</p>
+    <textarea id="f_scene" data-k="scene" data-count data-min="8" placeholder="예: 새들이 날지 못하고, 아이들이 밖에서 놀 수 없게 되었다."></textarea>
+    <div class="warn" id="w_scene">조금만 더 자세히 써 줄래요? 무엇이 어떻게 되었는지 문장으로 적어 주세요.</div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section>
+  <div class="snum">3</div>
+  <h2>누가 그렇게 만들었나</h2>
+  <p class="desc">지난 시간에 '맞서는 상대'를 만들었다면 그 캐릭터를 쓰세요.</p>
+  <div class="q">
+    <h3>원인이 된 사람들</h3>
+    <div class="chips" data-fill="f_who">
+      <button class="chip" type="button">마을 사람들</button>
+      <button class="chip" type="button">이웃 나라 상인</button>
+      <button class="chip" type="button">나라의 왕</button>
+      <button class="chip" type="button">공장을 세운 발명가</button>
+      <button class="chip" type="button">사냥꾼 무리</button>
+    </div>
+    <input type="text" id="f_who" data-k="who" data-count placeholder="누가 그렇게 만들었나">
+  </div>
+  <div class="q">
+    <h3>그 사람들이 한 일</h3>
+    <input type="text" id="f_did" data-k="did" data-count placeholder="예: 강물을 막아 커다란 둑을 쌓았다">
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="key">
+  <div class="snum">4</div>
+  <h2>그 사람은 왜 그랬을까</h2>
+  <p class="desc">오늘 가장 중요한 칸입니다. 나쁜 사람이라서가 아니라, <b>그 사람에게도 사정이 있었다면</b> 무엇이었을까요?</p>
+  <div class="q">
+    <h3>그 사람의 사정 <span class="must">꼭 쓰기</span></h3>
+    <p class="hint">"나빠서", "그냥"은 안 됩니다. 그 사람 입장이 되어 생각해 보세요.</p>
+    <textarea id="f_reason" data-k="reason" data-count data-min="10" placeholder="예: 가뭄이 들어 농사를 지을 물이 없었기 때문에, 강물을 모아 두려고 둑을 쌓았다."></textarea>
+    <div class="warn" id="w_reason">이 칸을 채워야 게임 문장이 만들어져요. 그 사람이 왜 그랬는지 한 문장으로 써 주세요.</div>
+  </div>
+  <div class="q">
+    <h3>그 사람이 멈추면 어떤 일이 생기나요?</h3>
+    <textarea id="f_cost" data-k="cost" data-count data-min="6" placeholder="예: 둑을 허물면 강은 살아나지만, 마을 사람들은 농사를 못 짓는다."></textarea>
+    <div class="warn" id="w_cost">조금만 더 써 줄래요?</div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section>
+  <div class="snum">5</div>
+  <h2>원소의 힘으로 해결하기</h2>
+  <p class="desc">주인공이 풀어야 할 과제 두 개를 만듭니다. 과제마다 조작 방식이 달라야 재미있습니다.</p>
+  <div id="missions"></div>
+</section>
+
+<!-- 6 -->
+<section class="key">
+  <div class="snum">6</div>
+  <h2>함께 사는 결말</h2>
+  <p class="desc">자연만 살리거나 사람만 살리는 게 아니라, <b>둘 다 살 수 있는 방법</b>을 찾으면 게임이 끝납니다.</p>
+  <div class="q">
+    <h3>주인공이 찾아낸 방법 <span class="must">꼭 쓰기</span></h3>
+    <textarea id="f_ending" data-k="ending" data-count data-min="10" placeholder="예: 바람의 힘으로 비구름을 불러와서, 둑이 없어도 농사를 지을 수 있게 했다."></textarea>
+    <div class="warn" id="w_ending">이 칸을 채워야 게임 문장이 만들어져요. 사람과 자연이 어떻게 함께 살게 되었는지 써 주세요.</div>
+  </div>
+</section>
+
+<!-- 7 -->
+<section>
+  <div class="snum">7</div>
+  <h2>게임 규칙</h2>
+  <div class="q">
+    <h3>이렇게 하면 이겨요</h3>
+    <div class="chips" data-fill="f_win">
+      <button class="chip" type="button">과제 두 개를 모두 해결하면 이겨요</button>
+      <button class="chip" type="button">자연 점수와 마을 점수를 둘 다 50 넘기면 이겨요</button>
+      <button class="chip" type="button">사라진 것을 모두 되살리면 이겨요</button>
+    </div>
+    <input type="text" id="f_win" data-k="win" data-count placeholder="이기는 조건">
+  </div>
+  <div class="q">
+    <h3>이렇게 되면 져요</h3>
+    <div class="chips" data-fill="f_lose">
+      <button class="chip" type="button">자연 점수가 0이 되면 져요</button>
+      <button class="chip" type="button">마을 점수가 0이 되면 져요</button>
+      <button class="chip" type="button">과제를 세 번 실패하면 져요</button>
+    </div>
+    <input type="text" id="f_lose" data-k="lose" data-count placeholder="지는 조건">
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <div class="snum">8</div>
+  <h2>러버블에 줄 문장</h2>
+  <p class="desc">4번과 6번을 채우면 문장이 열립니다. 캐릭터 그림을 먼저 올린 뒤 붙여넣으세요.</p>
+  <div class="q">
+    <h3>더 부탁하고 싶은 것 (선택)</h3>
+    <textarea id="f_extra" data-k="extra" placeholder="예: 배경 음악을 넣어 줘. 캐릭터가 말하는 장면을 넣어 줘."></textarea>
+  </div>
+  <div id="promptArea"></div>
+  <div class="btns">
+    <button class="btn btn-main" type="button" id="copy" disabled>문장 복사하기</button>
+  </div>
+</section>
+
+<!-- 9 -->
+<section>
+  <div class="snum">9</div>
+  <h2>만들고 나서</h2>
+  <div class="q"><h3>설계한 대로 나온 부분</h3><textarea id="f_good" data-k="good"></textarea></div>
+  <div class="q"><h3>다르게 나온 부분과 그 이유</h3><textarea id="f_bad" data-k="bad"></textarea></div>
+</section>
+
+<div class="footbar">
+  <div>
+    <span class="saved" id="saved">자동으로 임시 저장됩니다 · 게스트 창이 아닌 일반 창에서 써 주세요</span>
+    <button class="linkish" type="button" id="clear" style="margin-left:10px">전체 지우기</button>
+  </div>
+  <button class="btn btn-gold" type="button" id="pdf">PDF로 저장</button>
+</div>
+</div>
+
+<div class="mask" id="mask">
+  <div class="modal">
+    <h3>PDF로 저장하는 방법</h3>
+    <ol>
+      <li>잠시 뒤 인쇄 창이 열립니다.</li>
+      <li>대상 칸을 <b>PDF로 저장</b>으로 바꿉니다.</li>
+      <li><b>저장</b>을 누릅니다.</li>
+    </ol>
+    <p>저장이 안 되면 전체 복사를 눌러 다른 곳에 붙여넣어 두세요.</p>
+    <div class="btns">
+      <button class="btn btn-main" type="button" id="doprint">인쇄 창 열기</button>
+      <button class="btn btn-ghost" type="button" id="copyall">전체 복사</button>
+      <button class="btn btn-ghost" type="button" id="closemask">그만두기</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var KEY='nation-story-v1', CHAR_KEY='element-character-v2';
+  var mem={};
+  function sget(k){ try{ return localStorage.getItem(k); }catch(e){ return mem[k]||null; } }
+  function sset(k,v){ try{ localStorage.setItem(k,v); }catch(e){ mem[k]=v; } }
+  function sdel(k){ try{ localStorage.removeItem(k); }catch(e){ delete mem[k]; } }
+  var $=function(s){return document.querySelector(s);};
+  var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+  var tT;
+  function toast(m){ var t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(tT); tT=setTimeout(function(){t.classList.remove('on');},2000); }
+  function v(id){ var e=$('#'+id); return e?e.value.trim():''; }
+
+  /* 성의 있게 썼는지 확인: 자음·모음만, 너무 짧음, 같은 글자 반복 */
+  function real(s,min){
+    s=(s||'').trim();
+    if(!s) return false;
+    var noSpace=s.replace(/\s/g,'');
+    if(/^[ㄱ-ㅎㅏ-ㅣ.,!?~\s]+$/.test(s)) return false;
+    if(noSpace.length<(min||6)) return false;
+    if(/^(.)\1+$/.test(noSpace)) return false;
+    if(/^(몰라|모름|없음|없다|그냥|나빠서)[.!]?$/.test(noSpace)) return false;
+    return true;
+  }
+
+  /* 미션 카드 */
+  var MINI=['여러 개 중에서 알맞은 것 골라내기','제한 시간 안에 빠르게 누르기','드래그해서 알맞은 자리로 옮기기',
+    '되살릴 곳을 직접 칠하기','순서대로 이어 붙이기','숨어 있는 것 찾아 클릭하기'];
+  var mbox=$('#missions');
+  [1,2].forEach(function(n){
+    var d=document.createElement('div'); d.className='mcard';
+    var opts=MINI.map(function(m){return '<option>'+m+'</option>';}).join('');
+    d.innerHTML='<span class="tag">과제 '+n+'</span>'+
+      '<label>과제 이름</label><input type="text" id="f_m'+n+'name" data-k="m'+n+'name" data-count placeholder="예: 비구름 불러오기">'+
+      '<label>어떤 방식으로 푸나요?</label><select id="f_m'+n+'type" data-k="m'+n+'type" data-count><option value="">고르기</option>'+opts+'</select>'+
+      '<div class="ipo"><em>1</em><span>받는 것 — 플레이어가 손으로 무엇을 하나요?</span></div>'+
+      '<input type="text" id="f_m'+n+'in" data-k="m'+n+'in" data-count placeholder="예: 하늘에 흩어진 구름을 끌어서 마을 위로 옮긴다">'+
+      '<div class="ipo"><em>2</em><span>판단하는 것 — 컴퓨터가 무엇을 확인하나요?</span></div>'+
+      '<input type="text" id="f_m'+n+'proc" data-k="m'+n+'proc" data-count placeholder="예: 구름이 마을 위에 세 개 모였는지 확인한다">'+
+      '<div class="ipo"><em>3</em><span>보여 주는 것 — 화면에 무엇이 나타나나요?</span></div>'+
+      '<input type="text" id="f_m'+n+'out" data-k="m'+n+'out" data-count placeholder="예: 비가 내리고 논에 물이 차오르며 마을 점수가 오른다">';
+    mbox.appendChild(d);
+  });
+
+  var FIELDS=$$('[data-k]');
+
+  $$('.chips[data-fill]').forEach(function(box){
+    var t=$('#'+box.getAttribute('data-fill'));
+    box.querySelectorAll('.chip').forEach(function(ch){
+      ch.addEventListener('click',function(){
+        box.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+        ch.classList.add('on'); t.value=ch.textContent.trim(); save(); render();
+      });
+    });
+  });
+
+  function checkWarns(){
+    [['f_scene','w_scene'],['f_reason','w_reason'],['f_cost','w_cost'],['f_ending','w_ending']].forEach(function(p){
+      var el=$('#'+p[0]), w=$('#'+p[1]);
+      var min=parseInt(el.getAttribute('data-min')||'6',10);
+      var val=el.value.trim();
+      w.classList.toggle('on', val!=='' && !real(val,min));
+    });
+  }
+  function unlocked(){
+    return real(v('f_reason'),10) && real(v('f_ending'),10);
+  }
+
+  function buildPrompt(){
+    var L=[];
+    L.push('초등학생과 중학생이 할 수 있는 자연 보호 게임 웹앱을 만들어줘.');
+    L.push('휴대폰과 태블릿에서도 잘 보이게 만들어줘.');
+    L.push('내가 올린 캐릭터 그림을 주인공으로 그대로 써줘.');
+    L.push('');
+    L.push('[주인공] '+(v('f_hero')||'(이름)')+' — '+(v('f_el')||'(원소)')+' 원소를 쓴다');
+    if(v('f_wish')) L.push('[주인공의 소망] '+v('f_wish'));
+    if(v('f_place')) L.push('[나라] '+v('f_place'));
+    L.push('');
+    L.push('[이야기]');
+    L.push('- 사라지는 것: '+(v('f_lost')||'(정하는 중)'));
+    if(v('f_scene')) L.push('- 그래서 생긴 일: '+v('f_scene'));
+    L.push('- 원인: '+(v('f_who')||'누군가')+'이(가) '+(v('f_did')||'무언가를 했다'));
+    L.push('- 그 이유: '+v('f_reason'));
+    if(v('f_cost')) L.push('- 멈추면 생기는 문제: '+v('f_cost'));
+    L.push('- 결말: '+v('f_ending'));
+    L.push('');
+    L.push('[게임 방식]');
+    L.push('- 처음에 이야기를 짧게 보여 준 뒤 과제를 시작한다.');
+    L.push('- 원인이 된 사람은 나쁜 악당이 아니라 사정이 있는 사람으로 그려 준다. 대화 장면을 넣어 준다.');
+    L.push('- 화면 위에 자연 점수와 마을 점수를 함께 보여 준다.');
+    L.push('');
+    [1,2].forEach(function(n){
+      L.push('[과제 '+n+'] '+(v('f_m'+n+'name')||'(이름)'));
+      L.push('  · 방식: '+(v('f_m'+n+'type')||'(정하는 중)'));
+      L.push('  · 플레이어가 하는 일: '+(v('f_m'+n+'in')||'(정하는 중)'));
+      L.push('  · 컴퓨터가 확인하는 것: '+(v('f_m'+n+'proc')||'(정하는 중)'));
+      L.push('  · 화면에 나타나는 것: '+(v('f_m'+n+'out')||'(정하는 중)'));
+    });
+    L.push('');
+    L.push('[이기는 조건] '+(v('f_win')||'(정하는 중)'));
+    L.push('[지는 조건] '+(v('f_lose')||'(정하는 중)'));
+    if(v('f_extra')){ L.push(''); L.push('[더 부탁하는 것] '+v('f_extra')); }
+    L.push('');
+    L.push('[꼭 지켜야 할 것]');
+    L.push('- 두 과제는 조작 방식이 서로 달라야 해. 전부 4지선다 문제로 만들지 마.');
+    L.push('- 위에 적은 "플레이어가 하는 일"을 그대로 조작 방식으로 만들어 줘.');
+    L.push('- 실제 게임에 나오는 캐릭터나 이름은 쓰지 마.');
+    L.push('- 글자를 크게 하고, 버튼을 손가락으로 누르기 쉽게 만들어 줘.');
+    return L.join('\n');
+  }
+
+  function render(){
+    checkWarns();
+    var area=$('#promptArea'), btn=$('#copy');
+    if(unlocked()){
+      area.innerHTML='<div class="promptbox"></div>';
+      area.firstChild.textContent=buildPrompt();
+      btn.disabled=false;
+    }else{
+      var need=[];
+      if(!real(v('f_reason'),10)) need.push('4번 그 사람의 사정');
+      if(!real(v('f_ending'),10)) need.push('6번 함께 사는 결말');
+      area.innerHTML='<div class="lockbox">🔒 아직 문장이 잠겨 있어요<br>'+need.join(', ')+' 칸을 채우면 열립니다</div>';
+      btn.disabled=true;
+    }
+    var cnt=FIELDS.filter(function(f){return f.hasAttribute('data-count');});
+    var done=cnt.filter(function(f){
+      var min=parseInt(f.getAttribute('data-min')||'0',10);
+      return min? real(f.value,min) : f.value.trim()!=='';
+    }).length;
+    $('#barfill').style.width=(cnt.length?Math.round(done/cnt.length*100):0)+'%';
+    $('#barcount').textContent=done+' / '+cnt.length+' 칸';
+  }
+
+  var sT;
+  function save(){
+    var d={}; FIELDS.forEach(function(f){ d[f.getAttribute('data-k')]=f.value; });
+    sset(KEY,JSON.stringify(d));
+    var s=$('#saved'); s.textContent='저장됨';
+    clearTimeout(sT); sT=setTimeout(function(){s.textContent='자동으로 임시 저장됩니다 · 게스트 창이 아닌 일반 창에서 써 주세요';},1400);
+  }
+  function load(){
+    var raw=sget(KEY); if(!raw) return;
+    try{ var d=JSON.parse(raw); FIELDS.forEach(function(f){ var k=f.getAttribute('data-k'); if(d[k]!==undefined) f.value=d[k]; }); }catch(e){}
+  }
+  FIELDS.forEach(function(f){ f.addEventListener('input',function(){save();render();}); f.addEventListener('change',function(){save();render();}); });
+
+  /* 캐릭터 불러오기 */
+  $('#import').addEventListener('click',function(){
+    var raw=sget(CHAR_KEY);
+    if(!raw){ toast('지난 시간 설계서가 이 기기에 없어요. 직접 적어 주세요.'); return; }
+    try{
+      var d=JSON.parse(raw), cs=(d&&d.chars)||[];
+      if(!cs.length){ toast('불러올 캐릭터가 없어요.'); return; }
+      var hero=cs.filter(function(c){return (c.role||'').indexOf('주인공')>-1;})[0]||cs[0];
+      var foe=cs.filter(function(c){return (c.role||'').indexOf('상대')>-1;})[0];
+      var set=function(id,val){ if(val&&!$('#'+id).value.trim()) $('#'+id).value=val; };
+      set('f_hero',hero.name); set('f_el',hero.element); set('f_place',hero.place);
+      set('f_wish',hero.wish); set('f_lost',hero.lost);
+      if(foe&&foe.name) set('f_who',foe.name);
+      if(d.global&&d.global.me) set('f_me',d.global.me);
+      save(); render(); toast('캐릭터를 불러왔어요');
+    }catch(e){ toast('불러오지 못했어요. 직접 적어 주세요.'); }
+  });
+
+  function copyText(t,m){
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){toast(m);},function(){fb(t,m);});
+    }else fb(t,m);
+  }
+  function fb(t,m){
+    var ta=document.createElement('textarea'); ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast(m); }catch(e){ toast('복사가 안 돼요. 직접 선택해 주세요.'); }
+    document.body.removeChild(ta);
+  }
+  $('#copy').addEventListener('click',function(){ if(unlocked()) copyText(buildPrompt(),'문장을 복사했어요'); });
+  $('#copyall').addEventListener('click',function(){
+    var t='내 나라에 생긴 일 · 게임 설계서\n이름: '+v('f_me')+'   날짜: '+v('f_date')+'\n\n'+buildPrompt()+
+      '\n\n[설계한 대로 나온 부분] '+v('f_good')+'\n[다르게 나온 부분] '+v('f_bad');
+    copyText(t,'설계서를 복사했어요');
+  });
+  $('#clear').addEventListener('click',function(){ if(confirm('쓴 내용을 모두 지울까요?')){ sdel(KEY); location.reload(); } });
+  $('#pdf').addEventListener('click',function(){ $('#mask').classList.add('on'); });
+  $('#closemask').addEventListener('click',function(){ $('#mask').classList.remove('on'); });
+  $('#mask').addEventListener('click',function(e){ if(e.target===$('#mask')) $('#mask').classList.remove('on'); });
+  $('#doprint').addEventListener('click',function(){ $('#mask').classList.remove('on'); setTimeout(function(){ try{window.print();}catch(e){toast('인쇄가 막혀 있어요. 전체 복사를 써 주세요.');} },250); });
+
+  load();
+  if(!$('#f_date').value){ var d=new Date(); $('#f_date').value=d.getFullYear()+'. '+(d.getMonth()+1)+'. '+d.getDate()+'.'; }
+  render();
+})();
+</script>
+</body>
+</html>
