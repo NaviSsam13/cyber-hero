@@ -146,6 +146,10 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--green);outline-o
   <div class="btns" style="margin:0 0 16px">
     <button class="btn btn-violet" type="button" id="import">지난 시간 캐릭터 불러오기</button>
   </div>
+  <div id="pickbox" style="display:none;margin:-4px 0 18px">
+    <p style="margin:0 0 10px;font-size:14.5px;color:var(--muted)">게임의 주인공으로 쓸 캐릭터를 하나 고르세요.</p>
+    <div class="chips" id="picklist"></div>
+  </div>
   <div class="row2">
     <div class="q"><h3>주인공 이름</h3><input type="text" id="f_hero" data-k="hero" data-count placeholder="예: 에르아"></div>
     <div class="q"><h3>원소</h3><input type="text" id="f_el" data-k="el" data-count placeholder="예: 바람"></div>
@@ -463,20 +467,43 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--green);outline-o
   FIELDS.forEach(function(f){ f.addEventListener('input',function(){save();render();}); f.addEventListener('change',function(){save();render();}); });
 
   /* 캐릭터 불러오기 */
+  var CHARS=[], META={};
+  function applyChar(i){
+    var hero=CHARS[i]; if(!hero) return;
+    var foe=CHARS.filter(function(c,j){return j!==i && (c.role||'').indexOf('상대')>-1;})[0];
+    var put=function(id,val){ if(val) $('#'+id).value=val; };
+    put('f_hero',hero.name); put('f_el',hero.element); put('f_place',hero.place);
+    put('f_wish',hero.wish); put('f_lost',hero.lost);
+    if(foe&&foe.name&&!$('#f_who').value.trim()) $('#f_who').value=foe.name;
+    if(META.me&&!$('#f_me').value.trim()) $('#f_me').value=META.me;
+    $('#pickbox').style.display='none';
+    save(); render(); toast((hero.name||'캐릭터')+' 을(를) 불러왔어요');
+  }
+  function charLabel(c,i){
+    var parts=[c.name||('캐릭터 '+(i+1))];
+    if(c.element) parts.push(c.element);
+    if(c.role) parts.push(c.role);
+    return parts.join(' · ');
+  }
   $('#import').addEventListener('click',function(){
     var raw=sget(CHAR_KEY);
     if(!raw){ toast('지난 시간 설계서가 이 기기에 없어요. 직접 적어 주세요.'); return; }
     try{
-      var d=JSON.parse(raw), cs=(d&&d.chars)||[];
-      if(!cs.length){ toast('불러올 캐릭터가 없어요.'); return; }
-      var hero=cs.filter(function(c){return (c.role||'').indexOf('주인공')>-1;})[0]||cs[0];
-      var foe=cs.filter(function(c){return (c.role||'').indexOf('상대')>-1;})[0];
-      var set=function(id,val){ if(val&&!$('#'+id).value.trim()) $('#'+id).value=val; };
-      set('f_hero',hero.name); set('f_el',hero.element); set('f_place',hero.place);
-      set('f_wish',hero.wish); set('f_lost',hero.lost);
-      if(foe&&foe.name) set('f_who',foe.name);
-      if(d.global&&d.global.me) set('f_me',d.global.me);
-      save(); render(); toast('캐릭터를 불러왔어요');
+      var d=JSON.parse(raw);
+      CHARS=((d&&d.chars)||[]).filter(function(c){
+        return c && (c.name||c.element||c.place||c.wish);
+      });
+      META=(d&&d.global)||{};
+      if(!CHARS.length){ toast('불러올 캐릭터가 없어요. 직접 적어 주세요.'); return; }
+      if(CHARS.length===1){ applyChar(0); return; }
+      var box=$('#picklist'); box.innerHTML='';
+      CHARS.forEach(function(c,i){
+        var b=document.createElement('button');
+        b.type='button'; b.className='chip'; b.textContent=charLabel(c,i);
+        b.addEventListener('click',function(){ applyChar(i); });
+        box.appendChild(b);
+      });
+      $('#pickbox').style.display='block';
     }catch(e){ toast('불러오지 못했어요. 직접 적어 주세요.'); }
   });
 
